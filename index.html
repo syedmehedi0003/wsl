@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Class Notes – Mirogab</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Fraunces:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --paper: #161b22;
+    --ink: #e6edf3;
+    --ink-light: #8b949e;
+    --rule: #30363d;
+    --accent1: #ff7b72;   /* red – headings */
+    --accent2: #3fb950;   /* green – commands */
+    --accent3: #79c0ff;   /* blue – command text */
+    --accent4: #d2a8ff;   /* purple – special */
+    --highlight: #f9e784;
+    --tag-bg: #0d2818;
+    --tag-border: #3fb950;
+    --note-bg: #1c1a0f;
+    --note-border: #d4b800;
+    --shadow: rgba(0,0,0,0.40);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(255,255,255,0.025) 27px, rgba(255,255,255,0.025) 28px);
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: #010409;
+    color: #fff;
+    padding: 36px 40px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg, transparent, transparent 20px,
+      rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 40px
+    );
+  }
+  .header-inner { position: relative; max-width: 900px; margin: 0 auto; }
+  .site-header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+  .site-header h1 span { color: #f9e784; }
+  .site-header p {
+    margin-top: 10px;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .header-badge {
+    display: inline-block;
+    margin-top: 14px;
+    background: var(--accent2);
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 4px 12px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ── TOC ── */
+  .toc-wrap {
+    max-width: 900px;
+    margin: 32px auto 0;
+    padding: 0 24px;
+  }
+  .toc {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent4);
+    padding: 20px 24px;
+    box-shadow: 3px 3px 0 var(--shadow);
+  }
+  .toc h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent4);
+    margin-bottom: 12px;
+  }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin: 5px 0; }
+  .toc a {
+    font-size: 0.82rem;
+    color: var(--accent3);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .toc a:hover { color: var(--accent1); text-decoration: underline; }
+
+  /* ── Main layout ── */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  /* ── Section card ── */
+  .section-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.07);
+    opacity: 0;
+    transform: translateY(18px);
+    animation: fadeUp 0.5s ease forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section-card:nth-child(1) { animation-delay: 0.05s; }
+  .section-card:nth-child(2) { animation-delay: 0.12s; }
+  .section-card:nth-child(3) { animation-delay: 0.19s; }
+  .section-card:nth-child(4) { animation-delay: 0.26s; }
+  .section-card:nth-child(5) { animation-delay: 0.33s; }
+  .section-card:nth-child(6) { animation-delay: 0.40s; }
+  .section-card:nth-child(7) { animation-delay: 0.47s; }
+  .section-card:nth-child(8) { animation-delay: 0.54s; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--rule);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .section-header:hover { background: rgba(255,255,255,0.03); }
+  .sec-num {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent1);
+    min-width: 36px;
+    line-height: 1;
+  }
+  .sec-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    flex: 1;
+    line-height: 1.3;
+  }
+  .sec-chevron {
+    color: var(--ink-light);
+    font-size: 1rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .section-card.open .sec-chevron { transform: rotate(180deg); }
+
+  .section-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease;
+  }
+  .section-card.open .section-body { max-height: 4000px; }
+
+  .section-inner { padding: 20px 22px 24px; }
+
+  /* ── Sub-heading ── */
+  .sub-heading {
+    font-family: 'Fraunces', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent2);
+    margin: 20px 0 10px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .sub-heading:first-child { margin-top: 0; }
+
+  /* ── Note box ── */
+  .note {
+    background: var(--note-bg);
+    border-left: 3px solid var(--note-border);
+    padding: 8px 14px;
+    margin: 8px 0;
+    font-size: 0.8rem;
+    color: var(--ink-light);
+    line-height: 1.55;
+  }
+  .note strong { color: var(--ink); }
+
+  /* ── Command row ── */
+  .cmd-table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  .cmd-table tr { transition: background 0.15s; }
+  .cmd-table tr:hover td { background: rgba(63,185,80,0.07); }
+  .cmd-table td {
+    padding: 5px 8px;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    font-size: 0.82rem;
+  }
+  .cmd-table td:first-child { white-space: nowrap; width: 1%; }
+  .arrow { color: var(--accent2); font-weight: 700; padding-right: 4px; }
+  .cmd {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    color: var(--accent3);
+    background: rgba(121,192,255,0.10);
+    padding: 2px 7px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .cmd-comment {
+    color: var(--ink-light);
+    font-size: 0.78rem;
+    padding-left: 12px;
+    font-style: italic;
+  }
+
+  /* ── Vim keys ── */
+  .vim-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+  }
+  .vim-key {
+    background: var(--ink);
+    color: black;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 0.78rem;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .vim-key span { color: var(--highlight); margin-right: 6px; }
+
+  /* ── Stage diagram ── */
+  .stages {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 14px 0;
+    flex-wrap: wrap;
+  }
+  .stage-box {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px 14px;
+    text-align: center;
+    border: 2px solid var(--rule);
+    position: relative;
+  }
+  .stage-box.s1 { border-color: #ff7b72; background: #1f0f0e; }
+  .stage-box.s2 { border-color: #3fb950; background: #0d1f12; }
+  .stage-box.s3 { border-color: #79c0ff; background: #0d1623; }
+  .stage-num { font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; }
+  .stage-box.s1 .stage-num { color: #ff7b72; }
+  .stage-box.s2 .stage-num { color: #3fb950; }
+  .stage-box.s3 .stage-num { color: #79c0ff; }
+  .stage-name { font-size: 0.75rem; font-weight: 600; margin-top: 2px; }
+  .stage-tag { font-size: 0.65rem; margin-top: 3px; opacity: 0.7; }
+  .stage-arrow {
+    font-size: 1.2rem;
+    color: var(--ink-light);
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+  .stage-cmd {
+    font-size: 0.65rem;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent2);
+    margin-top: 5px;
+    font-weight: 600;
+  }
+
+  /* ── Conflict block ── */
+  .conflict-block {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    padding: 14px 18px;
+    margin: 10px 0;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    border-radius: 2px;
+    border-left: 3px solid var(--accent1);
+  }
+  .conflict-block .c-head { color: #ff7979; }
+  .conflict-block .c-mid  { color: #aaa; }
+  .conflict-block .c-tail { color: #79c8ff; }
+
+  /* ── Warning ── */
+  .warn {
+    background: #1f1400;
+    border: 1px solid #7d4e00;
+    border-left: 4px solid #e67e00;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    margin: 10px 0;
+    color: #e09030;
+  }
+  .warn strong { color: #ff7b72; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 32px 16px;
+    font-size: 0.72rem;
+    color: var(--ink-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  footer a { color: var(--accent3); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <h1>Git &amp; GitHub<br><span>Class Notes</span></h1>
+    <p>Mirogab · Handwritten Notes Transcribed · Source: bongoDev.com</p>
+    <span class="header-badge">Personal Study Reference</span>
+  </div>
+</header>
+
+<div class="toc-wrap">
+  <div class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#s1">Windows Setup – WSL</a></li>
+      <li><a href="#s2">Linux / Bash Basics</a></li>
+      <li><a href="#s3">Git Basics & The 3 Stages</a></li>
+      <li><a href="#s4">Portfolio Project Workflow</a></li>
+      <li><a href="#s5">Viewing Diffs, Logs & Commits</a></li>
+      <li><a href="#s6">Versions, Checkout & Reset</a></li>
+      <li><a href="#s7">Branching & Merge Conflicts</a></li>
+      <li><a href="#s8">Undoing / Restoring Changes</a></li>
+    </ol>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ═══ SECTION 1 ═══ -->
+  <div class="section-card open" id="s1">
+    <div class="section-header" onclick="toggle(this)">
+      <span class="sec-num">01</span>
+      <span class="sec-title">Windows Setup – WSL (Windows Subsystem for Linux)</span>
+      <span class="sec-chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="section-inner">
+        <div class="note"><strong>WSL</strong> = Windows Subsystem for Linux — run Linux commands inside Windows.</div>
+        <div class="note">First enable: <strong>Turn Windows features on/off → check WSL</strong></div>
+
+        <div class="sub-heading">WSL Commands</div>
+        <table class="cmd-table">
+          <tr><td><span class="arrow">➜</span><code class="cmd">wsl --help</code></td><td class="cmd-comment">show help</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">wsl --install</code></td><td class="cmd-comment">install WSL</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">wsl --list</code></td><td class="cmd-comment">list installed distros</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">wsl --list --online</code></td><td class="cmd-comment">list available distros online</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">wsl.exe --install Ubuntu</code></td><td class="cmd-comment">install Ubuntu (old way)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">wsl --install -d Ubuntu</code></td><td class="cmd-comment">install Ubuntu (preferred)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">wsl --list</code></td><td class="cmd-comment">verify installation</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">wsl --install -d Ubuntu-20.04</code></td><td class="cmd-comment">install Ubuntu 20.04 specifically</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">wsl --list</code></td><td class="cmd-comment">final check</td></tr>
+        </table>
+        <div class="note">Also: <strong>Microsoft Store → Ubuntu → Install</strong> as an alternative method.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 2 ═══ -->
+  <div class="section-card" id="s2">
+    <div class="section-header" onclick="toggle(this)">
+      <span class="sec-num">02</span>
+      <span class="sec-title">Linux / Bash Basics (AWS EC2 · Ubuntu Terminal)</span>
+      <span class="sec-chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="section-inner">
+        <div class="note"><strong>AWS:</strong> EC2 → Instances → Launch an instance → connect via Git Bash (Ubuntu)</div>
+
+        <div class="sub-heading">File & Directory Commands</div>
+        <table class="cmd-table">
+          <tr><td><span class="arrow">➜</span><code class="cmd">mkdir new-folder</code></td><td class="cmd-comment">create a new folder</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">touch love-letter.txt</code></td><td class="cmd-comment">create a new file</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">vim love-letter.txt</code></td><td class="cmd-comment">open file in Vim editor</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cat love-letter.txt</code></td><td class="cmd-comment">display file contents</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">ls</code></td><td class="cmd-comment">list files in current directory</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">ls -a</code></td><td class="cmd-comment">list ALL files including hidden ones</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">rm love-letter.txt</code></td><td class="cmd-comment">delete / remove a file</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cd new-folder</code></td><td class="cmd-comment">change directory (go into folder)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cd ..</code></td><td class="cmd-comment">go back one directory level</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">pwd</code></td><td class="cmd-comment">print working directory (current path)</td></tr>
+        </table>
+
+        <div class="sub-heading">Vim Editor Quick Keys</div>
+        <div class="vim-grid">
+          <div class="vim-key"><span style="color:red">i</span>Insert mode</div>
+          <div class="vim-key"><span style="color:red">Esc</span>Exit insert</div>
+          <div class="vim-key"><span style="color:red">:wq</span>Save &amp; quit</div>
+        </div>
+        <div class="note">git status → shows which folder git repo তৈরি করা হইসে, সেখানে cd দিয়ে যেতে হবে আগে</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 3 ═══ -->
+  <div class="section-card" id="s3">
+    <div class="section-header" onclick="toggle(this)">
+      <span class="sec-num">03</span>
+      <span class="sec-title">Git Basics – The 3 Stages</span>
+      <span class="sec-chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="section-inner">
+        <div class="note"><strong>Git is a version control system.</strong></div>
+
+        <div class="sub-heading">3 Stages of Git (after git init)</div>
+        <div class="stages">
+          <div class="stage-box s1">
+            <div class="stage-num">①</div>
+            <div class="stage-name">Working Area</div>
+            <div class="stage-tag">Unstaged — RED</div>
+          </div>
+          <div class="stage-arrow">→<br><small style="font-size:0.6rem;color:var(--accent2)">git add .</small></div>
+          <div class="stage-box s2">
+            <div class="stage-num">②</div>
+            <div class="stage-name">Staging Area</div>
+            <div class="stage-tag">Staged — GREEN</div>
+          </div>
+          <div class="stage-arrow">→<br><small style="font-size:0.6rem;color:var(--accent3)">git commit -m</small></div>
+          <div class="stage-box s3">
+            <div class="stage-num">③</div>
+            <div class="stage-name">Version Created</div>
+            <div class="stage-tag">Commit saved</div>
+          </div>
+        </div>
+
+        <div class="sub-heading">Initialise a Repository</div>
+        <table class="cmd-table">
+          <tr><td><span class="arrow">➜</span><code class="cmd">cd ..</code></td><td class="cmd-comment">go to parent directory</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">mkdir git-playground</code></td><td class="cmd-comment">create project folder</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cd git-playground</code></td><td class="cmd-comment">enter the folder</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git init</code></td><td class="cmd-comment">initialise Git repository</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">ls -a</code></td><td class="cmd-comment">see hidden .git folder</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">touch index.html</code></td><td class="cmd-comment">create a file</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">ls</code></td><td class="cmd-comment">verify file exists</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment">check current Git state</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git add index.html</code></td><td class="cmd-comment">stage specific file</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment">verify file is staged (green)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 4 ═══ -->
+  <div class="section-card" id="s4">
+    <div class="section-header" onclick="toggle(this)">
+      <span class="sec-num">04</span>
+      <span class="sec-title">Portfolio Project Workflow (index.html)</span>
+      <span class="sec-chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="section-inner">
+        <div class="note">Working on a portfolio website step-by-step — <strong>index.html</strong> (Portfolio file)</div>
+        <div class="sub-heading">Full Commit Sequence</div>
+        <table class="cmd-table">
+          <tr><td><span class="arrow">➜</span><code class="cmd">git init</code></td><td class="cmd-comment">initialise repo (VS terminal থেকে)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git ls</code></td><td class="cmd-comment">list tracked files</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git add index.html</code></td><td class="cmd-comment">stage the file</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git commit -m "add Boilerplate"</code></td><td class="cmd-comment">first commit</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log</code></td><td class="cmd-comment">review commit history</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment">check for new changes ★★</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git add .</code></td><td class="cmd-comment">stage ALL changed files</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment">confirm staging</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git commit -m "added hero section"</code></td><td class="cmd-comment">commit hero section</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log</code></td><td class="cmd-comment">verify new commit</td></tr>
+          <tr><td colspan="2" style="padding:4px 8px;font-size:0.75rem;color:var(--ink-light);font-style:italic">— then code add in VS file —</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git add .</code></td><td class="cmd-comment">stage after adding code</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git commit -m "added skills"</code></td><td class="cmd-comment">commit skills section</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log</code></td><td class="cmd-comment">review all commits</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 5 ═══ -->
+  <div class="section-card" id="s5">
+    <div class="section-header" onclick="toggle(this)">
+      <span class="sec-num">05</span>
+      <span class="sec-title">Viewing Diffs, Logs & Commits</span>
+      <span class="sec-chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="section-inner">
+        <table class="cmd-table">
+          <tr><td><span class="arrow">➜</span><code class="cmd">git diff</code></td><td class="cmd-comment">show unstaged changes  (Enter to scroll, q to quit) ★★</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment">check status</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git add .</code></td><td class="cmd-comment">stage all</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment">confirm staged</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git diff --staged</code></td><td class="cmd-comment">show staged changes before committing (Enter…)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git commit -m "added footer"</code></td><td class="cmd-comment">commit with message</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log</code></td><td class="cmd-comment">full commit log</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log --oneline</code></td><td class="cmd-comment">compact log – one line per commit (show all commits)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 6 ═══ -->
+  <div class="section-card" id="s6">
+    <div class="section-header" onclick="toggle(this)">
+      <span class="sec-num">06</span>
+      <span class="sec-title">Versions, Checkout & Reset</span>
+      <span class="sec-chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="section-inner">
+        <div class="sub-heading">Creating Multiple Versions</div>
+        <table class="cmd-table">
+          <tr><td><span class="arrow">➜</span><code class="cmd">git commit -m "version 1"</code></td><td class="cmd-comment">create version 1 snapshot ★★</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log</code></td><td class="cmd-comment">check version (shows commit hash/id)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">touch hello2.txt</code></td><td class="cmd-comment">create new file</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">ls</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git add hello2.txt</code></td><td class="cmd-comment">stage specific file (or multiple files)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git add .</code></td><td class="cmd-comment">OR stage all — পাশা পাশি multiple file add করা যায়</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git commit -m "version 2"</code></td><td class="cmd-comment">create version 2</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log --oneline</code></td><td class="cmd-comment">see both versions with commit IDs  ⇒ commit hash/id ↑</td></tr>
+        </table>
+
+        <div class="sub-heading">Navigating Between Versions</div>
+        <table class="cmd-table">
+          <tr><td><span class="arrow">➜</span><code class="cmd">git checkout 81966ba</code></td><td class="cmd-comment">jump to specific commit  (commit id দিয়ে নির্দিষ্ট commit-এ যাওয়া যায়)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log</code></td><td class="cmd-comment">only show hero section commit</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log --oneline</code></td><td class="cmd-comment">show all from this point</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git checkout master</code></td><td class="cmd-comment">return to latest  (or: git checkout commit_id)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log</code></td><td class="cmd-comment">all commits visible again</td></tr>
+        </table>
+
+        <div class="sub-heading">Resetting Commits ⚠️</div>
+        <div class="warn"><strong>⚠ WARNING:</strong> <code>git reset --hard</code> permanently removes commits. এটি দিয়ে permanently কোন একটি commit-এ back করা যায়।</div>
+        <table class="cmd-table">
+          <tr><td><span class="arrow">➜</span><code class="cmd">git reset --hard 81966ba</code></td><td class="cmd-comment">permanently go back to this commit (removes later commits)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log</code></td><td class="cmd-comment">verify – later commits gone, shows only up to "footer"</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git reflog</code></td><td class="cmd-comment">★★ safety net – shows ALL actions including deleted commits</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git reset --hard &lt;commit-id&gt;</code></td><td class="cmd-comment">recover using hash from reflog</td></tr>
+        </table>
+        <div class="note">git log → git reflog ★★ — use reflog to recover from accidental resets!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 7 ═══ -->
+  <div class="section-card" id="s7">
+    <div class="section-header" onclick="toggle(this)">
+      <span class="sec-num">07</span>
+      <span class="sec-title">Branching & Merge Conflicts</span>
+      <span class="sec-chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="section-inner">
+        <div class="sub-heading">Branch Switching</div>
+        <table class="cmd-table">
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log --oneline</code></td><td class="cmd-comment">view commit history</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git checkout master</code></td><td class="cmd-comment">switch to master</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git checkout ITBranch</code></td><td class="cmd-comment">switch to ITBranch</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git checkout main</code></td><td class="cmd-comment">switch to main branch [main branch এ থাকতে হবে]</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment">check current branch &amp; state</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">ls</code></td><td class="cmd-comment">list files</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cat conflict.txt</code></td><td class="cmd-comment">view file contents</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">vim conflict.txt</code></td><td class="cmd-comment">edit file  (i, Esc, :wq)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git add .</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment"></td></tr>
+        </table>
+
+        <div class="sub-heading">Merge Conflict Lab – Ubuntu Simulation</div>
+        <div class="note">Simulate two developers changing the same line. Run on Ubuntu / AWS EC2.</div>
+        <table class="cmd-table">
+          <tr><td><span class="arrow">➜</span><code class="cmd">sudo apt update</code></td><td class="cmd-comment">welcome to ubuntu</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">sudo apt install git</code></td><td class="cmd-comment">ei, ese, wq</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">mkdir merge-conflict</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cd merge-conflict</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">touch conflict.txt</code></td><td class="cmd-comment">create the conflict file</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">vim conflict.txt</code></td><td class="cmd-comment">add content → "welcome to ubuntu"</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git init</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git add .</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git commit -m "my-first-ubuntu version1"</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cat conflict.txt</code></td><td class="cmd-comment">verify: "welcome to ubuntu"</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">vim conflict.txt</code></td><td class="cmd-comment">edit: "Linus I hate u"  [ei, Esc, :wq]</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git ls</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git switch -b dev</code></td><td class="cmd-comment">switch to dev branch</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log --oneline</code></td><td class="cmd-comment">show log from main branch</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git commit -m "Imy-1 version3 from main branch"</code></td><td class="cmd-comment">→</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git add .</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git commit -m "Imy-1 main branch"</code></td><td class="cmd-comment">→</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git merge dev</code></td><td class="cmd-comment">merge dev into main → CONFLICT!</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cat conflict.txt</code></td><td class="cmd-comment">see conflict markers. Let's fix our own version.</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">vim conflict.txt</code></td><td class="cmd-comment">resolve: i, Esc, :wq</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git add .</code></td><td class="cmd-comment">mark conflict resolved</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git commit -m "Imy-1 version3 from main branch"</code></td><td class="cmd-comment">final merge commit</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git log --oneline</code></td><td class="cmd-comment">clean linear history</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cat conflict.txt</code></td><td class="cmd-comment">verify resolved content</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">vim conflict.txt</code></td><td class="cmd-comment">conflict এর সমাধান করতে হয়</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cat conflict.txt</code></td><td class="cmd-comment">verify final</td></tr>
+        </table>
+
+        <div class="sub-heading">Conflict File Format</div>
+        <div class="conflict-block">
+<span class="c-head">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+your version of the line
+<span class="c-mid">=======</span>
+<span class="c-tail">their version of the line
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; dev</span></div>
+        <div class="note">Fix: delete the markers, keep the correct code, then <code>git add .</code> and commit.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 8 ═══ -->
+  <div class="section-card" id="s8">
+    <div class="section-header" onclick="toggle(this)">
+      <span class="sec-num">08</span>
+      <span class="sec-title">Undoing / Restoring Changes</span>
+      <span class="sec-chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="section-inner">
+        <table class="cmd-table">
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment">see modified / deleted files</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">rm love-letter.txt</code></td><td class="cmd-comment">accidentally delete file</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">ls</code></td><td class="cmd-comment">file is gone</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git status</code></td><td class="cmd-comment">git shows it as deleted</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">git restore love-letter.txt</code></td><td class="cmd-comment">restore deleted file from last commit</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cat love-letter.txt</code></td><td class="cmd-comment">verify file is back</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">ls -a</code></td><td class="cmd-comment">show hidden files (for show hidden file)</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cd .git</code></td><td class="cmd-comment">explore .git internals</td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">ls</code></td><td class="cmd-comment"></td></tr>
+          <tr><td><span class="arrow">➜</span><code class="cmd">cd ..</code></td><td class="cmd-comment">go back (for back directory)</td></tr>
+        </table>
+        <div class="note">git is a version control system — it keeps every version, so you can always restore!</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  Mirogab &nbsp;·&nbsp; <a href="https://www.bongodev.com" target="_blank">bongoDev.com</a> &nbsp;·&nbsp; Git Class Notes
+</footer>
+
+<script>
+  function toggle(header) {
+    const card = header.closest('.section-card');
+    card.classList.toggle('open');
+  }
+
+  // smooth scroll for TOC links
+  document.querySelectorAll('.toc a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // open the card
+        if (!target.classList.contains('open')) {
+          target.querySelector('.section-header').click();
+        }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
